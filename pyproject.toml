@@ -1,7 +1,7 @@
 [project]
-name = "rag_system"
+name = "multilingual-rag-system"
 version = "0.1.0"
-description = "Production-grade RAG system with benchmarking, hybrid retrieval, and evidence verification"
+description = "Offline multilingual RAG system with hybrid retrieval, local LLMs, reranking, and evidence verification"
 requires-python = ">=3.11"
 readme = "README.md"
 
@@ -35,12 +35,14 @@ all = [
     "reportlab>=4.2.0",
     "streamlit>=1.38.0",
 ]
+
 dev = [
     "pytest>=8.0.0",
     "pytest-cov>=4.1.0",
     "black>=24.1.0",
     "ruff>=0.2.0",
     "mypy>=1.8.0",
+    "PyMuPDF>=1.24.0",
 ]
 
 [build-system]

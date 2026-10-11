@@ -91,11 +91,38 @@ class TestChunkDocument:
         assert chunks == []
 
 
+
 class TestChunkFile:
-    def test_chunk_real_pdf_file(self, pipeline):
-        chunks = pipeline.chunk_file("data/raw/01_Enacted_Budget_Law_2024_AR.pdf")
+    def test_chunk_real_pdf_file(self, pipeline, tmp_path):
+        """Test chunking a generated PDF without external files."""
+        import fitz
+
+        pdf_path = tmp_path / "test_document.pdf"
+
+        # Create a temporary PDF with extractable text
+        with fitz.open() as document:
+            page = document.new_page()
+            page.insert_text(
+                (72, 72),
+                "This is a sample PDF document for testing. "
+                "It contains enough text to produce chunks. "
+                "Retrieval augmented generation processes documents.",
+                fontsize=11,
+            )
+            document.save(str(pdf_path))
+
+        # Run the actual ingestion and chunking pipeline
+        chunks = pipeline.chunk_file(str(pdf_path))
+
         assert len(chunks) > 0
-        assert all(chunk.metadata.source_file == "01_Enacted_Budget_Law_2024_AR.pdf" for chunk in chunks)
+        assert all(
+            chunk.metadata.source_file == pdf_path.name
+            for chunk in chunks
+        )
+        assert all(
+            chunk.metadata.document_hash
+            for chunk in chunks
+        )
 
     def test_chunk_files_handles_invalid_gracefully(self, pipeline):
         results = pipeline.chunk_files(["README.md"])
