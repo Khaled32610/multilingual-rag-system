@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+# Runtime data and generated artifacts
+data/**
+!data/
+!data/**/.gitkeep
+logs/
+*.log
+# OS / Editor
+.DS_Store
+.vscode/
+.idea/
+# Models and weights
+*.onnx
+*.pt
+*.pth
+*.safetensors
