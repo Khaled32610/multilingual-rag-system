@@ -1,6 +1,67 @@
-# RAG System
+<div align="center">
 
-Local Arabic/English Retrieval-Augmented Generation for PDF collections. The pipeline combines PDF extraction, hybrid retrieval, grounded generation, evidence verification, persistent chat, document management, evaluation, experiments, and PDF reporting. The selected generation model is `gemma3:4b`.
+# Offline Multilingual RAG System
+
+**Arabic & English document question answering with local LLMs**
+
+Hybrid Retrieval · Evidence Verification · Benchmarking · Streamlit · Docker
+
+</div>
+
+> **Project status:** Research / engineering prototype. Local inference is available after initial model downloads; benchmark results below are specific to the project's evaluation datasets and CPU environment, not general accuracy guarantees.
+
+## Overview
+
+A locally deployable Retrieval-Augmented Generation (RAG) application for asking questions over PDF collections in Arabic and English. Its modular pipeline processes documents, indexes multilingual embeddings, combines dense and lexical retrieval, optionally reranks passages, and generates evidence-grounded answers through Ollama. It includes document management, persistent chat history, evaluations, and a Streamlit interface.
+
+## Architecture
+
+```mermaid
+flowchart TD
+    A[PDF documents] --> B[Validate, extract and clean]
+    B --> C[Chunk documents]
+    C --> D[Multilingual embeddings]
+    C --> E[BM25 lexical index]
+    D --> F[FAISS vector index]
+    Q[Arabic or English question] --> G[Hybrid retrieval]
+    E --> G
+    F --> G
+    G --> H[Reciprocal rank fusion]
+    H --> I[Optional cross-encoder reranking]
+    I --> J[Evidence and context selection]
+    J --> K[Ollama local LLM]
+    K --> L[Source and evidence verification]
+    L --> M[Answer with citations or refusal]
+```
+
+**Default configuration** (`configs/config.yaml`): `intfloat/multilingual-e5-base` embeddings, FAISS + BM25 retrieval, `BAAI/bge-reranker-v2-m3` reranking, and `gemma3:4b` via Ollama. Reranking carries substantial CPU latency and should be evaluated against responsiveness needs.
+
+## Highlights
+
+- Multilingual PDF extraction and recursive chunking, retaining document metadata.
+- Hybrid semantic + lexical retrieval with reciprocal rank fusion.
+- Optional cross-encoder reranking and evidence-grounded generation.
+- Citation checks, numeric evidence checks, and refusal handling for insufficient evidence.
+- Local Ollama models and a Streamlit UI with document management and chat history.
+- Evaluation scripts for embeddings, retrieval, and LLM output; automated unit tests.
+
+## Evaluation snapshots
+
+These results were recorded in this project's reports, on specific local datasets. They should **not** be interpreted as benchmark performance on unseen documents.
+
+| Evaluation | Setup | Reported result |
+|---|---|---|
+| Embedding comparison | One Arabic PDF, 4 labeled questions | `multilingual-e5-base` Recall@3: **4/4** |
+| Initial retrieval study | One PDF, 10 labeled questions | Hybrid RRF Recall@3: **1.00**, MRR: **0.85**, average latency: **206 ms** |
+| Reranking comparison | Same 10-query retrieval study | MRR: **0.90**, average latency: **18.48 s** |
+| LLM model comparison | 8 Ollama models; 70 bilingual questions (35 Arabic, 35 English) | `gemma3:4b`: **80.0%** original heuristic accuracy; **28.6 s** mean latency |
+| LLM stricter rescore | 68 retained answers per compared model | `gemma3:4b`: **77.9%** primary score, **61.8%** strict score |
+
+The re-score changes numeric matching and excludes an unanswerable item; it is **not directly interchangeable** with the initial accuracy measure. Model scoring uses automated comparison signals. Consult [embedding results](docs/benchmarks/embedding_benchmark_results.md), [retrieval results](docs/benchmarks/retrieval_benchmark_results.md), and [LLM results](docs/benchmarks/llm_benchmark_results.md) for limitations and methodology.
+
+**Current automated test check (local):** 233 unit tests passed in 11.40 s (Python 3.12.3, Ubuntu). This does not establish production readiness or end-to-end performance across environments.
+
+---
 
 ## Requirements
 
@@ -98,3 +159,9 @@ PDF generation requires Google Chrome or Chromium and Arabic-capable fonts.
 Use `--output-dir PATH` to keep separate runs. The optional `--report-from FILE.json`
 only rebuilds reports from a previous run; it does not perform fresh retrieval and
 is explicitly recorded in the provenance.
+
+---
+
+## Maintainer
+
+**Khaled Taha** · [GitHub](https://github.com/Khaled32610) · [LinkedIn](https://www.linkedin.com/in/khaled-taha10/)
